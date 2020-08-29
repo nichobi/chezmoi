@@ -26,7 +26,6 @@ linters:
   - ineffassign
   - interfacer
   - misspell
-  - nakedret
   - nolintlint
   - prealloc
   - rowserrcheck
@@ -55,6 +54,7 @@ linters:
   - gomnd
   - lll
   - maligned
+  - nakedret
   - nestif
   - nlreturn
   - noctx
@@ -93,3 +93,6 @@ issues:
   - linters:
     - scopelint
     path: "_test\\.go"
+  - linters:
+    - goerr113
+    text: "do not define dynamic errors, use wrapped static errors instead"
