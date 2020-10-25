@@ -1,0 +1,4 @@
+[!darwin] stop
+
+chezmoi execute-template '{{ index ioreg "IOKitBuildVersion" }}'
+stdout 'Darwin Kernel Version'

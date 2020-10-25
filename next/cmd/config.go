@@ -102,6 +102,9 @@ type Config struct {
 	stdin  io.Reader
 	stdout io.Writer
 	stderr io.Writer
+
+	//nolint:structcheck,unused
+	ioregData ioregData
 }
 
 // A configOption sets and option on a Config.
@@ -255,6 +258,7 @@ func newConfig(options ...configOption) (*Config, error) {
 		"bitwarden":                c.bitwardenFunc,
 		"gopass":                   func(id string) string { return c.passlikeFunc(&c.Gopass, id) },
 		"include":                  c.includeFunc,
+		"ioreg":                    c.ioregFunc,
 		"joinPath":                 c.joinPathFunc,
 		"keepassxc":                c.keepassxcFunc,
 		"keepassxcAttribute":       c.keepassxcAttributeFunc,

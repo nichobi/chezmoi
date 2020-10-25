@@ -2,11 +2,19 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
+
+	"howett.net/plist"
 )
+
+type ioregData struct {
+	value map[string]interface{}
+}
 
 func (c *Config) includeFunc(filename string) string {
 	contents, err := c.fs.ReadFile(path.Join(c.absSourceDir, filename))
@@ -14,6 +22,29 @@ func (c *Config) includeFunc(filename string) string {
 		panic(err)
 	}
 	return string(contents)
+}
+
+func (c *Config) ioregFunc() map[string]interface{} {
+	if runtime.GOOS != "darwin" {
+		return nil
+	}
+
+	if c.ioregData.value != nil {
+		return c.ioregData.value
+	}
+
+	cmd := exec.Command("ioreg", "-a", "-l")
+	output, err := c.baseSystem.IdempotentCmdOutput(cmd)
+	if err != nil {
+		panic(fmt.Errorf("ioreg: %w", err))
+	}
+
+	var value map[string]interface{}
+	if _, err := plist.Unmarshal(output, &value); err != nil {
+		panic(fmt.Errorf("ioreg: %w", err))
+	}
+	c.ioregData.value = value
+	return value
 }
 
 func (c *Config) joinPathFunc(elem ...string) string {

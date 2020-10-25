@@ -54,6 +54,8 @@ func TestScript(t *testing.T) {
 		},
 		Condition: func(cond string) (bool, error) {
 			switch cond {
+			case "darwin":
+				return runtime.GOOS == "darwin", nil
 			case "windows":
 				return runtime.GOOS == "windows", nil
 			default:
