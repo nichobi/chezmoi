@@ -89,7 +89,9 @@ func TestValidateKeys(t *testing.T) {
 	}
 }
 
+//nolint:unparam
 func newTestConfig(t *testing.T, fs vfs.FS, options ...configOption) *Config {
+	// FIXME remove unparam
 	system := chezmoi.NewRealSystem(fs, chezmoitest.NewPersistentState())
 	c, err := newConfig(append(
 		[]configOption{

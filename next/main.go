@@ -8,6 +8,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -31,10 +32,8 @@ func main() {
 		if s := err.Error(); s != "" {
 			fmt.Fprintf(os.Stderr, "chezmoi: %s\n", s)
 		}
-		code := 1
-		if exitCode, ok := err.(cmd.ErrExitCode); ok {
-			code = int(exitCode)
-		}
-		os.Exit(code)
+		errExitCode := cmd.ErrExitCode(1)
+		_ = errors.As(err, &errExitCode)
+		os.Exit(int(errExitCode))
 	}
 }
