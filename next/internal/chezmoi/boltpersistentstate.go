@@ -74,8 +74,7 @@ func (b *BoltPersistentState) Get(bucket, key []byte) ([]byte, error) {
 		if b == nil {
 			return nil
 		}
-		v := b.Get(key)
-		if v != nil {
+		if v := b.Get(key); v != nil {
 			value = make([]byte, len(v))
 			copy(value, v)
 		}

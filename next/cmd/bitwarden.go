@@ -11,15 +11,16 @@ import (
 )
 
 type bitwardenConfig struct {
-	Command string
-	cache   map[string]interface{}
+	Command     string
+	outputCache map[string][]byte
 }
 
-func (c *Config) bitwardenFunc(args ...string) interface{} {
+func (c *Config) bitwardenOutput(args []string) []byte {
 	key := strings.Join(args, "\x00")
-	if data, ok := c.Bitwarden.cache[key]; ok {
+	if data, ok := c.Bitwarden.outputCache[key]; ok {
 		return data
 	}
+
 	name := c.Bitwarden.Command
 	args = append([]string{"get"}, args...)
 	cmd := exec.Command(name, args...)
@@ -29,13 +30,36 @@ func (c *Config) bitwardenFunc(args ...string) interface{} {
 	if err != nil {
 		panic(fmt.Errorf("%s %s: %w\n%s", name, chezmoi.ShellQuoteArgs(args), err, output))
 	}
-	var data interface{}
+
+	if c.Bitwarden.outputCache == nil {
+		c.Bitwarden.outputCache = make(map[string][]byte)
+	}
+	c.Bitwarden.outputCache[key] = output
+	return output
+}
+
+func (c *Config) bitwardenFunc(args ...string) map[string]interface{} {
+	output := c.bitwardenOutput(args)
+	var data map[string]interface{}
 	if err := json.Unmarshal(output, &data); err != nil {
-		panic(fmt.Errorf("%s %s: %w\n%s", name, chezmoi.ShellQuoteArgs(args), err, output))
+		panic(fmt.Errorf("%s %s: %w\n%s", c.Bitwarden.Command, chezmoi.ShellQuoteArgs(args), err, output))
 	}
-	if c.Bitwarden.cache == nil {
-		c.Bitwarden.cache = make(map[string]interface{})
-	}
-	c.Bitwarden.cache[key] = data
 	return data
+}
+
+func (c *Config) bitwardenFieldsFunc(args ...string) map[string]interface{} {
+	output := c.bitwardenOutput(args)
+	var data struct {
+		Fields []map[string]interface{} `json:"fields"`
+	}
+	if err := json.Unmarshal(output, &data); err != nil {
+		panic(fmt.Errorf("%s %s: %w\n%s", c.Bitwarden.Command, chezmoi.ShellQuoteArgs(args), err, output))
+	}
+	result := make(map[string]interface{})
+	for _, field := range data.Fields {
+		if name, ok := field["name"].(string); ok {
+			result[name] = field
+		}
+	}
+	return result
 }

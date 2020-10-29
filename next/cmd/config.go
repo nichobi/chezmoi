@@ -79,6 +79,9 @@ type Config struct {
 	Pass          passlikeConfig
 	Vault         vaultConfig
 
+	// Password manager data.
+	keyring keyringData
+
 	// Command configurations, settable in the config file.
 	CD   cdCmdConfig
 	Diff diffCmdConfig
@@ -256,12 +259,14 @@ func newConfig(options ...configOption) (*Config, error) {
 
 	for key, value := range map[string]interface{}{
 		"bitwarden":                c.bitwardenFunc,
+		"bitwardenFields":          c.bitwardenFieldsFunc,
 		"gopass":                   func(id string) string { return c.passlikeFunc(&c.Gopass, id) },
 		"include":                  c.includeFunc,
 		"ioreg":                    c.ioregFunc,
 		"joinPath":                 c.joinPathFunc,
 		"keepassxc":                c.keepassxcFunc,
 		"keepassxcAttribute":       c.keepassxcAttributeFunc,
+		"keyring":                  c.keyringFunc,
 		"lastpass":                 c.lastpassFunc,
 		"lastpassRaw":              c.lastpassRawFunc,
 		"lookPath":                 c.lookPathFunc,
